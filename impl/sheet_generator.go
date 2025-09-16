@@ -5,45 +5,24 @@ import (
     "math/rand"
 )
 
-func calc_color(color_map *map[int]int, max_val int) int {
-    max_color_id := 0
-    diff_colors := 0
-    
-    for i := 1; i < int(max_val); i++ {
-	if (*color_map)[i] > 0 {
-	    diff_colors += 1
-	} else {
-	    continue
-	}
-	
-	if (max_color_id == 0) {
-	    max_color_id = i
-	} else if (*color_map)[i] > (*color_map)[max_color_id] {
-	    max_color_id = i
-	}
-	
-    }
-
-    if diff_colors > 3 {
-	return 0
-    } else {
-	return max_color_id
-    }
-}
-
-func sum_point_neighbor(color_map *[][]int, point image.Point, max_val int) int {
-    turns := [8]image.Point{
+var turns = [8]image.Point{
 	{-1, -1}, {-1,  0}, {-1,  1},
 	{ 0, -1},           { 0,  1},
 	{ 1, -1}, { 1,  0}, { 1,  1},
     }
-    
+
+func calc_color(values []int8, conditions []map[int8]generate_conditions) int {
+    res := 0
+    for i := 0; i < len(conditions) && res == 0; i++ {
+	res = i * check_all_condition(values, conditions[i])
+    }
+    return res
+}
+
+func sum_point_neighbor(color_map *[][]int, point image.Point, conditions []map[int8]generate_conditions) int {
     available_rect := image.Rect(0,0,len(*color_map),len((*color_map)[0]))
 
-    sum := make(map[int]int)
-    for i := 0; i < int(max_val); i++ {
-	sum[i] = 0
-    }
+    sum := make([]int8, 8)
     
     for _, turn := range turns {
 	next_point := point.Add(turn)
@@ -56,7 +35,7 @@ func sum_point_neighbor(color_map *[][]int, point image.Point, max_val int) int 
 	sum[val]++
     }
     
-    return calc_color(&sum, max_val)
+    return calc_color(sum, conditions)
 }
 
 func make_color_sheet(sheet *ColorfullSheet, max_val uint) [][]int {
@@ -75,14 +54,16 @@ func make_color_sheet(sheet *ColorfullSheet, max_val uint) [][]int {
     return color_sheet
 }
 
-func FillSheet (sheet *ColorfullSheet, object_maker func(uint)*ColorfullObject, max_val uint) *ColorfullSheet{
-    color_sheet := make_color_sheet(sheet, max_val)
+func FillSheet (sheet *ColorfullSheet, object_maker func(uint)*ColorfullObject) *ColorfullSheet{
+    color_sheet := make_color_sheet(sheet, uint(7))
     swap_color_sheet := make_color_sheet(sheet, 0)
     
-    for i := 0; i < 10; i++ {
+    conditions, repeat_cnt := read_conditions()
+    
+    for i := 0; i < repeat_cnt; i++ {
 	for x := 0; x < len(color_sheet); x++ {
 	    for y := 0; y < len(color_sheet[x]); y++ {
-		swap_color_sheet[x][y] = sum_point_neighbor(&color_sheet, image.Point{x, y}, 7)
+		swap_color_sheet[x][y] = sum_point_neighbor(&color_sheet, image.Point{x, y}, conditions)
 	    }
 	}
 	color_sheet, swap_color_sheet = swap_color_sheet, color_sheet

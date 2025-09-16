@@ -26,14 +26,14 @@ func save_image(sheet *sheet_generator.ColorfullSheet){
 
 func main(){
     base_colors := []color.RGBA{
-	color.RGBA{255, 255, 255, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
 	color.RGBA{255, 0, 0, 255}, 
 	color.RGBA{0, 255, 0, 255}, 
-	color.RGBA{0, 0, 255, 255}, 
-	color.RGBA{255, 255, 0, 255}, 
-	color.RGBA{255, 0, 255, 255}, 
-	color.RGBA{0, 255, 255, 255}, 
-	color.RGBA{100, 100, 100, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
+	color.RGBA{0, 0, 0, 255}, 
     }
     
     object_maker := func(id uint) *sheet_generator.ColorfullObject {
@@ -47,7 +47,7 @@ func main(){
     var sheet sheet_generator.ColorfullSheet
     sheet.SetSize(500, 500)
 
-    res_sheet := sheet_generator.FillSheet(&sheet, object_maker, uint(len(base_colors)))
+    res_sheet := sheet_generator.FillSheet(&sheet, object_maker)
 
     save_image(res_sheet)
 }
